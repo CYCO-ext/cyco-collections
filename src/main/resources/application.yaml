@@ -1,0 +1,61 @@
+quarkus:
+  otel:
+    enabled: true
+    exporter:
+      otlp:
+        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+  application:
+    name: collection-service
+
+  http:
+    port: 8080
+
+
+  mongodb:
+    connection-string: ${QUARKUS_MONGODB_CONNECTION_STRING:mongodb://mongo:27017}
+    database: ${QUARKUS_MONGODB_DATABASE:coletas}
+
+
+  log:
+    level: INFO
+    category:
+      "infrastructure":
+        level: DEBUG
+      "org.apache.kafka":
+        level: WARN
+
+
+  jackson:
+    fail-on-unknown-properties: false
+
+
+mp:
+  messaging:
+    incoming:
+      collector-events:
+        connector: smallrye-kafka
+        topic: collector.events
+        bootstrap:
+          servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+
+        value:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+        auto:
+          offset:
+            reset: earliest
+
+        group:
+          id: collection-service-group
+
+        enable:
+          auto:
+            commit: true
+
+
+app:
+  matching:
+    max-distance-meters: 5000
+    max-candidates: 20
+
+
